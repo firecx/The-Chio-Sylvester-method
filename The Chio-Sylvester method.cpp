@@ -99,8 +99,9 @@ double chioDeterminant(double** matrix, int n) {
     HeapFree(GetProcessHeap(), 0, threads);
     HeapFree(GetProcessHeap(), 0, threadData);
 
-    // Рекурсивный вызов
+    // Рекурсивный вызов, сделать n-3 и делить 1 на это
     double det = customPow(pivot, n - 2) * chioDeterminant(newMatrix, newSize);
+
 
     // Освобождаем память
     for (int i = 0; i < newSize; ++i) HeapFree(GetProcessHeap(), 0, newMatrix[i]);
