@@ -173,5 +173,7 @@ int main() {
     for (int i = 0; i < orderMatrix; ++i) HeapFree(GetProcessHeap(), 0, matrix[i]);
     HeapFree(GetProcessHeap(), 0, matrix);
 
+system("pause");
+
     return 0;
 }
