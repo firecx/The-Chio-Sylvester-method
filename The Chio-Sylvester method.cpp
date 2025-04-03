@@ -102,11 +102,6 @@ double chioDeterminant(double** matrix, int n) {
     // Ожидаем завершения потоков
     WaitForMultipleObjects(threadCount, threads, TRUE, INFINITE);
 
-    for (int i = 0; i < newSize; ++i) {
-        for (int j = 0; j < newSize; ++j) {
-            
-        }
-    }
 
     // Освобождаем ресурсы
     for (int i = 0; i < threadCount; ++i) CloseHandle(threads[i]);
