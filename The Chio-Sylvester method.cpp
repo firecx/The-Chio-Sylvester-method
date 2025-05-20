@@ -2,6 +2,7 @@
 
 #include <Windows.h>
 #include <iostream>
+#include <math.h>
 
 // Структура для передачи данных в поток
 struct ThreadData {
@@ -15,28 +16,34 @@ struct ThreadData {
 
 // Функция вычисления определителя матрицы 2x2
 double det2(double** m) {
-    return (m[0][0] * m[1][1]) - (m[0][1] * m[1][0]);  // ad - bc
+    return (m[0][0] * m[1][1]) - (m[0][1] * m[1][0]);
 }
 
-// Ручная реализация pow
-double pow(double base, int exponent) {
-    double result = 1.0;
-    if (exponent >= 0) {
-        for (int i = 0; i < exponent; ++i) result *= base;
+//Функция для считывания матрицы
+void scanMatrix(double** matrix, int orderMatrix) {
+    for (int i = 0; i < orderMatrix; ++i) {
+        for (int j = 0; j < orderMatrix; ++j) {
+            scanf("%lf", &matrix[i][j]);
+        }
     }
-    else
-    {
-        for (int i = 0; i < exponent; ++i) result /= base;
-    }
-    return result;
 }
 
-// Функция потока для вычисления элемента
+//Функция для вывода матрицы в косоль
+void printMatrix(double** matrix, int orderMatrix) {
+    for (int i = 0; i < orderMatrix; ++i) {
+        for (int j = 0; j < orderMatrix; ++j) {
+            printf("%lf ", matrix[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+// Функция потока для вычисления элемента сконденсированной матрицы
 DWORD WINAPI computeElement(LPVOID lpParam) {
-    ThreadData* data = (ThreadData*)lpParam;
+    ThreadData* data = (ThreadData*)lpParam; // Структура данных потока
 
-    // Создаем временную матрицу 2x2
-    double** tempMatrix = (double**)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, 2 * sizeof(double*));
+    // Создание временной матрицы 2x2
+    double** tempMatrix = (double**)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, 2 * sizeof(double*)); // Временная матрица
     tempMatrix[0] = (double*)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, 2 * sizeof(double));
     tempMatrix[1] = (double*)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, 2 * sizeof(double));
 
@@ -57,42 +64,61 @@ DWORD WINAPI computeElement(LPVOID lpParam) {
     return 0;
 }
 
-// Основная функция вычисления определителя
+// Функция вычисления определителя матрицы методом Чио-Сильвестра
 double chioDeterminant(double** matrix, int n) {
     if (n == 1) return matrix[0][0];
     if (n == 2) return det2(matrix);
 
+    int sign = 1; // Множетель знака определителя
+   
     // Поиск опорного элемента
-    /*
-    int pivotRow = 0, pivotCol = 0;
+    int pillarRow = 0, pillarCol = 0;
     BOOL found = FALSE;
-    for (int i = 0; i < orderMatrix && !found; ++i) {
-        for (int j = 0; j < orderMatrix && !found; ++j) {
+    for (int i = 0; i < n && !found; ++i) {
+        for (int j = 0; j < n && !found; ++j) {
             if (matrix[i][j] != 0) {
-                pivotRow = i;
-                pivotCol = j;
+                pillarRow = i;
+                pillarCol = j;
                 found = TRUE;
             }
         }
     }
     if (!found) return 0;
-    */
+    
+    // Перестройка матрицы
+    if (pillarRow != 0) {
+        for (int j = 0; j < n; ++j) {
+            std::swap(matrix[pillarRow][j], matrix[0][j]);
+        }
+        sign *= -1;
+    }
+    if (pillarCol != 0) {
+        for (int i = 0; i < n; ++i)
+        {
+            std::swap(matrix[i][pillarCol], matrix[i][0]);
+        }
+        sign *= -1;
+    }
+    if (found) {
+        printf("\nRebuilt matrix\n");
+        printMatrix(matrix, n);
+    }
 
-    double pillar = matrix[0][0];
-    int newSize = n - 1;
+    double pillar = matrix[0][0]; // Опорный элемент
+    int newSize = n - 1; // Размерность новой (сконденсированной) матрицы
 
     // Выделяем память под новую матрицу
-    double** newMatrix = (double**)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, newSize * sizeof(double*));
+    double** newMatrix = (double**)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, newSize * sizeof(double*)); // Сконденсированная матрица
     for (int i = 0; i < newSize; ++i) {
         newMatrix[i] = (double*)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, newSize * sizeof(double));
     }
 
     // Подготавливаем многопоточное вычисление
-    HANDLE* threads = (HANDLE*)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, newSize * newSize * sizeof(HANDLE));
-    ThreadData* threadData = (ThreadData*)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, newSize * newSize * sizeof(ThreadData));
+    HANDLE* threads = (HANDLE*)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, newSize * newSize * sizeof(HANDLE)); // Потоки вычисления
+    ThreadData* threadData = (ThreadData*)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, newSize * newSize * sizeof(ThreadData)); // Данные для потоков
 
-    // Запускаем потоки
-    int threadCount = 0;
+    // Запуск потоков
+    int threadCount = 0; // Счётчик потоков
     for (int i = 0; i < newSize; ++i) {
         for (int j = 0; j < newSize; ++j) {
             threadData[threadCount] = { matrix, n, pillar, i, j, &newMatrix[i][j] };
@@ -110,25 +136,18 @@ double chioDeterminant(double** matrix, int n) {
     HeapFree(GetProcessHeap(), 0, threads);
     HeapFree(GetProcessHeap(), 0, threadData);
 
+    //Выводим новую матрицу
     printf("\nnewMatrix\n");
+    printMatrix(newMatrix, newSize);
 
-    for (int i = 0; i < newSize; ++i) {
-        for (int j = 0; j < newSize; ++j) {
-            printf("%lf ", newMatrix[i][j]);
-        }
-        printf("\n");
-    }
-    printf("1/%f\n", pow(pillar, n - 2));
     // Рекурсивный вызов
-    double det = chioDeterminant(newMatrix, newSize) / pow(pillar, n-2);
-
+    double det = chioDeterminant(newMatrix, newSize) / pow(pillar, n-2) * sign;
 
     // Освобождаем память
     for (int i = 0; i < newSize; ++i)
     {
         HeapFree(GetProcessHeap(), 0, newMatrix[i]);
     }
-    
     HeapFree(GetProcessHeap(), 0, newMatrix);
 
     return det;
@@ -136,52 +155,33 @@ double chioDeterminant(double** matrix, int n) {
 
 // Точка входа консольного приложения
 int main() {
-    // Создаем матрицу
-    int orderMatrix = 0;
+    // Задаём размерность матрицы
+    int orderMatrix = 0; // Размерность матрицы
+    printf("orderMatrix = ");
+    scanf("%d", &orderMatrix);
 
-    while (orderMatrix == 0)
-    {
-        printf("\norderMatrix = ");
-        scanf("%d", &orderMatrix);
-        scanf("");
-    }
-
-    double** matrix = (double**)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, orderMatrix * sizeof(double*));
-
+    // Создание матрицы и выделение памяти
+    double** matrix = (double**)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, orderMatrix * sizeof(double*)); // Матрица
     for (int i = 0; i < orderMatrix; ++i) {
         matrix[i] = (double*)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, orderMatrix * sizeof(double));
     }
 
-    for (int i = 0; i < orderMatrix; ++i) {
-        for (int j = 0; j < orderMatrix; ++j) {
-            scanf_s("%lf", &matrix[i][j]);
-        }
-    }
-
-
-    printf_s("\n");
-
-    for (int i = 0; i < orderMatrix; ++i) {
-        for (int j = 0; j < orderMatrix; ++j) {
-            printf_s("%lf ", matrix[i][j]);
-        }
-        printf_s("\n");
-    }
+    // Ввод матрицы
+    scanMatrix(matrix, orderMatrix);
+    printf("\nOriginal matrix\n");
+    printMatrix(matrix, orderMatrix);
 
     // Вычисляем определитель
     double det = chioDeterminant(matrix, orderMatrix);
 
     // Выводим результат в консоль
-    char buffer[50];
-    sprintf_s(buffer, "Determinant: %.4f", det);
-    OutputDebugStringA(buffer);  // Для отладки
-    printf("\nMatrix determinant: %.4f\n", det);
+    printf("\nMatrix determinant: %lf\n", det);
 
     // Освобождаем память
     for (int i = 0; i < orderMatrix; ++i) HeapFree(GetProcessHeap(), 0, matrix[i]);
     HeapFree(GetProcessHeap(), 0, matrix);
 
-system("pause");
+    system("pause");
 
     return 0;
 }
