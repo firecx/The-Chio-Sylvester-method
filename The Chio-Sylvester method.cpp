@@ -1,4 +1,6 @@
-﻿#include <Windows.h>
+﻿#define _CRT_SECURE_NO_WARNINGS
+
+#include <Windows.h>
 #include <iostream>
 
 // Структура для передачи данных в поток
@@ -108,13 +110,13 @@ double chioDeterminant(double** matrix, int n) {
     HeapFree(GetProcessHeap(), 0, threads);
     HeapFree(GetProcessHeap(), 0, threadData);
 
-    printf_s("\nnewMatrix\n");
+    printf("\nnewMatrix\n");
 
     for (int i = 0; i < newSize; ++i) {
         for (int j = 0; j < newSize; ++j) {
-            printf_s("%lf ", newMatrix[i][j]);
+            printf("%lf ", newMatrix[i][j]);
         }
-        printf_s("\n");
+        printf("\n");
     }
     printf("1/%f\n", pow(pillar, n - 2));
     // Рекурсивный вызов
@@ -122,7 +124,11 @@ double chioDeterminant(double** matrix, int n) {
 
 
     // Освобождаем память
-    for (int i = 0; i < newSize; ++i) HeapFree(GetProcessHeap(), 0, newMatrix[i]);
+    for (int i = 0; i < newSize; ++i)
+    {
+        HeapFree(GetProcessHeap(), 0, newMatrix[i]);
+    }
+    
     HeapFree(GetProcessHeap(), 0, newMatrix);
 
     return det;
@@ -131,25 +137,27 @@ double chioDeterminant(double** matrix, int n) {
 // Точка входа консольного приложения
 int main() {
     // Создаем матрицу
-    const int orderMatrix = 4;
+    int orderMatrix = 0;
+
+    while (orderMatrix == 0)
+    {
+        printf("\norderMatrix = ");
+        scanf("%d", &orderMatrix);
+        scanf("");
+    }
+
     double** matrix = (double**)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, orderMatrix * sizeof(double*));
+
     for (int i = 0; i < orderMatrix; ++i) {
         matrix[i] = (double*)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, orderMatrix * sizeof(double));
     }
 
-    // Заполняем матрицу (диагональная с шумом)
-    /*
     for (int i = 0; i < orderMatrix; ++i) {
         for (int j = 0; j < orderMatrix; ++j) {
             scanf_s("%lf", &matrix[i][j]);
         }
     }
-    */
 
-    matrix[0][0] = 4;    matrix[0][1] = -3;   matrix[0][2] = 6;     matrix[0][3] = -7;
-    matrix[1][0] = -2;   matrix[1][1] = -1;   matrix[1][2] = 0;     matrix[1][3] = 2;
-    matrix[2][0] = 4;    matrix[2][1] = -3;   matrix[2][2] = 4;     matrix[2][3] = -1;
-    matrix[3][0] = 3;    matrix[3][1] = 2;    matrix[3][2] = 9;     matrix[3][3] = -4;
 
     printf_s("\n");
 
