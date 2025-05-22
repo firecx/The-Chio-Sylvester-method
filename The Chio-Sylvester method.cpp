@@ -73,35 +73,40 @@ double chioDeterminant(double** matrix, int n) {
    
     // Поиск опорного элемента
     int pillarRow = 0, pillarCol = 0;
-    BOOL found = FALSE;
-    for (int i = 0; i < n && !found; ++i) {
-        for (int j = 0; j < n && !found; ++j) {
-            if (matrix[i][j] != 0) {
-                pillarRow = i;
-                pillarCol = j;
-                found = TRUE;
+    
+    if (matrix[0][0] == 0)
+    {
+        BOOL found = FALSE; // Триггер о нахождении элемента
+
+        for (int i = 0; i < n && !found; ++i) {
+            for (int j = 0; j < n && !found; ++j) {
+                if (matrix[i][j] != 0) {
+                    pillarRow = i;
+                    pillarCol = j;
+                    found = TRUE;
+                }
             }
         }
-    }
-    if (!found) return 0;
-    
-    // Перестройка матрицы
-    if (pillarRow != 0) {
-        for (int j = 0; j < n; ++j) {
-            std::swap(matrix[pillarRow][j], matrix[0][j]);
+        if (!found) return 0;
+
+        // Перестройка матрицы
+        if (pillarRow != 0) {
+            for (int j = 0; j < n; ++j) {
+                std::swap(matrix[pillarRow][j], matrix[0][j]);
+            }
+            sign *= -1;
         }
-        sign *= -1;
-    }
-    if (pillarCol != 0) {
-        for (int i = 0; i < n; ++i)
-        {
-            std::swap(matrix[i][pillarCol], matrix[i][0]);
+        if (pillarCol != 0) {
+            for (int i = 0; i < n; ++i)
+            {
+                std::swap(matrix[i][pillarCol], matrix[i][0]);
+            }
+            sign *= -1;
         }
-        sign *= -1;
-    }
-    if (found) {
+
         printf("\nRebuilt matrix\n");
         printMatrix(matrix, n);
+
     }
 
     double pillar = matrix[0][0]; // Опорный элемент
