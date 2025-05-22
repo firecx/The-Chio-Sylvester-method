@@ -32,7 +32,7 @@ void scanMatrix(double** matrix, int orderMatrix) {
 void printMatrix(double** matrix, int orderMatrix) {
     for (int i = 0; i < orderMatrix; ++i) {
         for (int j = 0; j < orderMatrix; ++j) {
-            printf("%lf ", matrix[i][j]);
+            printf("%lf\t", matrix[i][j]);
         }
         printf("\n");
     }
