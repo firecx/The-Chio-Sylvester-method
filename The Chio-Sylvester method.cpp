@@ -162,34 +162,35 @@ double chioDeterminant(double** matrix, int n) {
 // Точка входа консольного приложения
 int main() {
     // Задаём размерность матрицы
-    int orderMatrix = NULL; // Размерность матрицы
-    printf("orderMatrix = ");
-    scanf("%d", &orderMatrix);
+    int matrixOrder = NULL; // Размерность матрицы
+    printf("Matrix order = ");
+    scanf("%d", &matrixOrder);
     //СДКЛАТЬ ПРОВЕРКУ ЧТО orderMatrix КОРЕТНЫЙ
-    if (orderMatrix == NULL) {
-        printf("error orderMatrix");
+    if (matrixOrder == NULL) {
+        printf("error Matrix order");
         return 0;
     }
 
     // Создание матрицы и выделение памяти
-    double** matrix = (double**)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, orderMatrix * sizeof(double*)); // Матрица
-    for (int i = 0; i < orderMatrix; ++i) {
-        matrix[i] = (double*)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, orderMatrix * sizeof(double));
+    double** matrix = (double**)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, matrixOrder * sizeof(double*)); // Матрица
+    for (int i = 0; i < matrixOrder; ++i) {
+        matrix[i] = (double*)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, matrixOrder * sizeof(double));
     }
 
     // Ввод матрицы
-    scanMatrix(matrix, orderMatrix);
+    printf("\nEnter the elements of the matrix:\n");
+    scanMatrix(matrix, matrixOrder);
     printf("\nOriginal matrix\n");
-    printMatrix(matrix, orderMatrix);
+    printMatrix(matrix, matrixOrder);
 
     // Вычисляем определитель
-    double det = chioDeterminant(matrix, orderMatrix);
+    double det = chioDeterminant(matrix, matrixOrder);
 
     // Выводим результат в консоль
     printf("\nMatrix determinant: %lf\n", det);
 
     // Освобождаем память
-    for (int i = 0; i < orderMatrix; ++i) HeapFree(GetProcessHeap(), 0, matrix[i]);
+    for (int i = 0; i < matrixOrder; ++i) HeapFree(GetProcessHeap(), 0, matrix[i]);
     HeapFree(GetProcessHeap(), 0, matrix);
 
     system("pause");
