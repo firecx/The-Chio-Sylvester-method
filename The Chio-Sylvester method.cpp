@@ -44,6 +44,7 @@ DWORD WINAPI computeElement(LPVOID lpParam) {
 
     // Создание временной матрицы 2x2
     double** tempMatrix = (double**)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, 2 * sizeof(double*)); // Временная матрица
+    //Выделенеи памяти
     tempMatrix[0] = (double*)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, 2 * sizeof(double));
     tempMatrix[1] = (double*)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, 2 * sizeof(double));
 
@@ -126,8 +127,8 @@ double chioDeterminant(double** matrix, int n) {
     int threadCount = 0; // Счётчик потоков
     for (int i = 0; i < newSize; ++i) {
         for (int j = 0; j < newSize; ++j) {
-            threadData[threadCount] = { matrix, n, pillar, i, j, &newMatrix[i][j] };
-            threads[threadCount] = CreateThread(NULL, 0, computeElement, &threadData[threadCount], 0, NULL);
+            threadData[threadCount] = { matrix, n, pillar, i, j, &newMatrix[i][j] }; // Данные для потока
+            threads[threadCount] = CreateThread(NULL, 0, computeElement, &threadData[threadCount], 0, NULL); // Запуск потока
             ++threadCount;
         }
     }
@@ -161,9 +162,14 @@ double chioDeterminant(double** matrix, int n) {
 // Точка входа консольного приложения
 int main() {
     // Задаём размерность матрицы
-    int orderMatrix = 0; // Размерность матрицы
+    int orderMatrix = NULL; // Размерность матрицы
     printf("orderMatrix = ");
     scanf("%d", &orderMatrix);
+    //СДКЛАТЬ ПРОВЕРКУ ЧТО orderMatrix КОРЕТНЫЙ
+    if (orderMatrix == NULL) {
+        printf("error orderMatrix");
+        return 0;
+    }
 
     // Создание матрицы и выделение памяти
     double** matrix = (double**)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, orderMatrix * sizeof(double*)); // Матрица
