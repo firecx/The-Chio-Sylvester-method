@@ -28,7 +28,7 @@ void scanMatrix(double** matrix, int orderMatrix) {
     }
 }
 
-//Функция для вывода матрицы в косоль
+//Функция для вывода матрицы в консоль
 void printMatrix(double** matrix, int orderMatrix) {
     for (int i = 0; i < orderMatrix; ++i) {
         for (int j = 0; j < orderMatrix; ++j) {
@@ -70,7 +70,7 @@ double chioDeterminant(double** matrix, int n) {
     if (n == 1) return matrix[0][0];
     if (n == 2) return det2(matrix);
 
-    int sign = 1; // Множетель знака определителя
+    int sign = 1; // Множитель знака определителя
    
     // Поиск опорного элемента
     int pillarRow = 0, pillarCol = 0;
@@ -165,7 +165,7 @@ int main() {
     int matrixOrder = NULL; // Размерность матрицы
     printf("Matrix order = ");
     scanf("%d", &matrixOrder);
-    //СДКЛАТЬ ПРОВЕРКУ ЧТО orderMatrix КОРЕТНЫЙ
+    //Проверка сто orderMatrix корректный
     if (matrixOrder == NULL) {
         printf("error Matrix order");
         return 0;
