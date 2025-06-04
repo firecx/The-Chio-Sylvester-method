@@ -165,7 +165,7 @@ int main() {
     int matrixOrder = NULL; // Размерность матрицы
     printf("Matrix order = ");
     scanf("%d", &matrixOrder);
-    //Проверка сто orderMatrix корректный
+    //Проверка, что orderMatrix корректный
     if (matrixOrder == NULL) {
         printf("error Matrix order");
         return 0;
